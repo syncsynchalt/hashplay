@@ -38,7 +38,7 @@
     function createPadding(dataLength) {
         var i, need, padding,
             hl = 0, // todo - handle lengths higher than 2^32/8
-            ll = (dataLength*8) & 4294957295,
+            ll = (dataLength*8)>>>0,
             l = (dataLength*8)%512;
         if (l+8 > 448)
             l -= 512;
@@ -70,7 +70,7 @@
             block[i] = ((str.charCodeAt(index+0) & 0xff) << 24) |
                        ((str.charCodeAt(index+1) & 0xff) << 16) |
                        ((str.charCodeAt(index+2) & 0xff) <<  8) |
-                       ((str.charCodeAt(index+3) & 0xff) <<  0);
+                       ((str.charCodeAt(index+3) & 0xff)      ) >>> 0;
             index += 4;
         }
         if (i == 16)
@@ -79,25 +79,25 @@
             block[i++] = ((padding[0] & 0xff) << 24) |
                          ((padding[1] & 0xff) << 16) |
                          ((padding[2] & 0xff) <<  8) |
-                         ((padding[3] & 0xff) <<  0);
+                         ((padding[3] & 0xff)      ) >>> 0;
             padIndex = 4;
         } else if (str.length % 4 == 1) {
             block[i++] = ((str.charCodeAt(str.length-1) & 0xff) << 24) |
                          ((padding[0] & 0xff) << 16) |
                          ((padding[1] & 0xff) <<  8) |
-                         ((padding[2] & 0xff) <<  0);
+                         ((padding[2] & 0xff)      ) >>> 0;
             padIndex = 3;
         } else if (str.length % 4 == 2) {
             block[i++] = ((str.charCodeAt(str.length-2) & 0xff) << 24) |
                          ((str.charCodeAt(str.length-1) & 0xff) << 16) |
                          ((padding[0] & 0xff) <<  8) |
-                         ((padding[1] & 0xff) <<  0);
+                         ((padding[1] & 0xff)      ) >>> 0;
             padIndex = 2;
         } else if (str.length % 4 == 3) {
             block[i++] = ((str.charCodeAt(str.length-3) & 0xff) << 24) |
                          ((str.charCodeAt(str.length-2) & 0xff) << 16) |
                          ((str.charCodeAt(str.length-1) & 0xff) <<  8) |
-                         ((padding[0] & 0xff) <<  8);
+                         ((padding[0] & 0xff)      ) >>> 0;
             padIndex = 1;
         }
 
@@ -105,7 +105,7 @@
             block[i] = (padding[padIndex+0] << 24) |
                        (padding[padIndex+1] << 16) |
                        (padding[padIndex+2] <<  8) |
-                       (padding[padIndex+3]      );
+                       (padding[padIndex+3]      ) >>> 0;
             padIndex += 4;
         }
         padding.splice(0, padIndex);
