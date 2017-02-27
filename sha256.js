@@ -37,8 +37,8 @@
 
     function createPadding(dataLength) {
         var i, need, padding,
-            hl = dataLength / 4294967296,
-            ll = dataLength & 4294957295,
+            hl = 0, // todo - handle lengths higher than 2^32/8
+            ll = (dataLength*8) & 4294957295,
             l = (dataLength*8)%512;
         if (l+8 > 448)
             l -= 512;
@@ -112,6 +112,18 @@
         return block;
     }
 
+    function printHash(hs) {
+        var i, s, result = "";
+        for (i = 0; i < 8; i++) {
+            s = hs[i].toString(16);
+            while (s.length < 8) {
+                s = "0"+s;
+            }
+            result += s;
+        }
+        return result;
+    }
+
     window.sha256 = function sha256(str) {
         var hs = [ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
                    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 ],
@@ -130,29 +142,28 @@
             a = hs[0]; b = hs[1]; c = hs[2]; d = hs[3];
             e = hs[4]; f = hs[5]; g = hs[6]; h = hs[7];
             for (t = 0; t < 64; t++) {
-                T1 = (h + bsig1(e) + ch(e, f, g) + k[t] + W[t]) >>> 0;
+                T1 = (((((((h + bsig1(e)) >>> 0) + ch(e, f, g)) >>> 0) + k[t]) >>> 0) + W[t]) >>> 0;
                 T2 = (bsig0(a) + maj(a, b, c)) >>> 0;
                 h = g;
                 g = f;
                 f = e;
-                e = d + T1;
+                e = (d + T1) >>> 0;
                 d = c;
                 c = b;
                 b = a;
-                a = T1 + T2;
+                a = (T1 + T2) >>> 0;
             }
             hs[0] = (a + hs[0]) >>> 0;
             hs[1] = (b + hs[1]) >>> 0;
-            hs[2] = (c + hs[1]) >>> 0;
-            hs[3] = (d + hs[1]) >>> 0;
-            hs[4] = (e + hs[1]) >>> 0;
-            hs[5] = (f + hs[1]) >>> 0;
-            hs[6] = (g + hs[1]) >>> 0;
-            hs[7] = (h + hs[1]) >>> 0;
+            hs[2] = (c + hs[2]) >>> 0;
+            hs[3] = (d + hs[3]) >>> 0;
+            hs[4] = (e + hs[4]) >>> 0;
+            hs[5] = (f + hs[5]) >>> 0;
+            hs[6] = (g + hs[6]) >>> 0;
+            hs[7] = (h + hs[7]) >>> 0;
             index += 64;
         }
 
-        return hs[0].toString(16) + hs[1].toString(16) + hs[2].toString(16) + hs[3].toString(16) +
-               hs[4].toString(16) + hs[5].toString(16) + hs[6].toString(16) + hs[7].toString(16);
+        return printHash(hs);
     };
 })();

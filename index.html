@@ -9,6 +9,9 @@
 .container {
     padding: 1em;
 }
+.output {
+    font-family: monospace;
+}
 </style>
 </head>
 <body>
@@ -20,7 +23,7 @@
             <!-- todo: checkbox for CRLF->LF -->
         </div>
     </form>
-    <p>Result: <span id="sha256output"></span>
+    <p>Result: <span id="sha256output" class="output"></span>
 </div>
 <script src="sha256.js"></script>
 <script>
