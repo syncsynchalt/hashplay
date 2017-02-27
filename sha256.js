@@ -36,6 +36,7 @@
     }
 
     function createPadding(dataLength) {
+        // todo - convert to utf-8
         var i, need, padding,
             hl = 0, // todo - handle lengths higher than 2^32/8
             ll = (dataLength*8)>>>0,
@@ -59,6 +60,7 @@
     }
 
     function readBlock(str, index, padding) {
+        // todo - convert to utf-8
         var block = new Array(16),
             i, padIndex;
         if (padding.length === 0) {
