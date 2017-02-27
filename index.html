@@ -1,0 +1,35 @@
+<html>
+<head>
+<title>Hash playground</title>
+<link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+    crossorigin="anonymous">
+<style>
+.container {
+    padding: 1em;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <form>
+        <div class="form-group">
+            <label for="sha256input">SHA-256</label>
+            <textarea id="sha256input" class="form-control" rows="5" spellcheck="false"></textarea>
+            <!-- todo: checkbox for CRLF->LF -->
+        </div>
+    </form>
+    <p>Result: <span id="sha256output"></span>
+</div>
+<script src="sha256.js"></script>
+<script>
+    var ein = document.getElementById('sha256input'),
+        eout = document.getElementById('sha256output');
+    eout.innerHTML = sha256(ein.value);
+    ein.onkeyup = function() {
+        eout.innerHTML = sha256(ein.value);
+    }
+</script>
+</body>
+</html>
