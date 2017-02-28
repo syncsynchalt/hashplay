@@ -62,7 +62,7 @@
     function readBlock(str, index, padding) {
         // todo - convert to utf-8
         var block = new Array(16),
-            i, padIndex;
+            i, padIndex, rem;
         if (padding.length === 0) {
             return undefined;
         }
@@ -77,30 +77,33 @@
         }
         if (i == 16)
             return block;
-        if (str.length % 4 == 0) {
+        rem = str.length - index;
+        if (rem === 0) {
             block[i++] = ((padding[0] & 0xff) << 24) |
                          ((padding[1] & 0xff) << 16) |
                          ((padding[2] & 0xff) <<  8) |
                          ((padding[3] & 0xff)      ) >>> 0;
             padIndex = 4;
-        } else if (str.length % 4 == 1) {
+        } else if (rem === 1) {
             block[i++] = ((str.charCodeAt(str.length-1) & 0xff) << 24) |
                          ((padding[0] & 0xff) << 16) |
                          ((padding[1] & 0xff) <<  8) |
                          ((padding[2] & 0xff)      ) >>> 0;
             padIndex = 3;
-        } else if (str.length % 4 == 2) {
+        } else if (rem === 2) {
             block[i++] = ((str.charCodeAt(str.length-2) & 0xff) << 24) |
                          ((str.charCodeAt(str.length-1) & 0xff) << 16) |
                          ((padding[0] & 0xff) <<  8) |
                          ((padding[1] & 0xff)      ) >>> 0;
             padIndex = 2;
-        } else if (str.length % 4 == 3) {
+        } else if (rem === 3) {
             block[i++] = ((str.charCodeAt(str.length-3) & 0xff) << 24) |
                          ((str.charCodeAt(str.length-2) & 0xff) << 16) |
                          ((str.charCodeAt(str.length-1) & 0xff) <<  8) |
                          ((padding[0] & 0xff)      ) >>> 0;
             padIndex = 1;
+        } else {
+            padIndex = 0;
         }
 
         for (; i < 16; i++) {
