@@ -1,6 +1,6 @@
+'use strict';
 (function() {
-    var modlim = 2**32;
-    var k = [
+    const k = [
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
         0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
         0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -11,15 +11,14 @@
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 ];
 
     function ch(x, y, z) {
-        return (x & y) ^ (~x & z);
+        return x&y ^ ~x&z;
     }
 
     function maj(x, y, z) {
-        return (x & y) ^ (x & z) ^ (y & z);
+        return x&y ^ x&z ^ y&z;
     }
 
-    function rotr(w, num) { return (w>>>num | w <<(32-num)) >>> 0; }
-    function rotl(w, num) { return (w <<num | w>>>(32-num)) >>> 0; }
+    function rotr(w, num) { return (w>>>num | w <<32-num) >>> 0; }
     function shr (w, num) { return w>>>num; }
 
     function bsig0(w) {
@@ -37,15 +36,16 @@
 
     function createPadding(dataLength) {
         // todo - convert to utf-8
-        var i, need, padding,
-            hl = 0, // todo - handle lengths higher than 2^32/8
+        let hl = 0, // todo - handle lengths higher than 2^32/8
             ll = (dataLength*8)>>>0,
             l = (dataLength*8)%512;
-        if (l+8 > 448)
+        if (l+8 > 448) {
             l -= 512;
-        need = 448-l-8;
-        padding = [0x80];
-        for (i = 0; i < need; i+=8) {
+        }
+        const need = 448-l-8;
+
+        let padding = [0x80];
+        for (let i = 0; i < need; i+=8) {
             padding.push(0);
         }
         padding.push(hl >> 24 & 0xff);
@@ -60,24 +60,30 @@
     }
 
     function readBlock(str, index, padding) {
-        // todo - convert to utf-8
-        var block = new Array(16),
-            i, padIndex, rem;
         if (padding.length === 0) {
             return undefined;
         }
+
+        // todo - convert to utf-8
+
+        let block = new Array(16);
+        let i;
         for (i = 0; i < 16; i++) {
-            if (index+4 > str.length)
+            if (index+4 > str.length) {
                 break;
+            }
             block[i] = ((str.charCodeAt(index+0) & 0xff) << 24) |
                        ((str.charCodeAt(index+1) & 0xff) << 16) |
                        ((str.charCodeAt(index+2) & 0xff) <<  8) |
                        ((str.charCodeAt(index+3) & 0xff)      ) >>> 0;
             index += 4;
         }
-        if (i == 16)
+        if (i === 16) {
             return block;
-        rem = str.length - index;
+        }
+
+        const rem = str.length - index;
+        let padIndex;
         if (rem === 0) {
             block[i++] = ((padding[0] & 0xff) << 24) |
                          ((padding[1] & 0xff) << 16) |
@@ -118,11 +124,11 @@
     }
 
     function printHash(hs) {
-        var i, s, result = "";
-        for (i = 0; i < 8; i++) {
-            s = hs[i].toString(16);
+        let result = '';
+        for (let i = 0; i < 8; i++) {
+            let s = hs[i].toString(16);
             while (s.length < 8) {
-                s = "0"+s;
+                s = '0'+s;
             }
             result += s;
         }
@@ -130,25 +136,25 @@
     }
 
     window.sha256 = function sha256(str) {
-        var hs = [ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-                   0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 ],
-            padding = createPadding(str.length),
-            t, index = 0,
-            W = new Array(64),
-            block, a, b, c, d, e, f, g, h, T1, T2;
+        const hs = [ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+                     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 ];
+        let padding = createPadding(str.length),
+            index = 0,
+            W = new Array(64);
 
-        while (block = readBlock(str, index, padding)) {
-            for (t = 0; t < 16; t++) {
+        let block;
+        while ((block = readBlock(str, index, padding)) !== undefined) {
+            for (let t = 0; t < 16; t++) {
                 W[t] = block[t];
             }
-            for (t = 16; t < 64; t++) {
+            for (let t = 16; t < 64; t++) {
                 W[t] = ssig1(W[t-2]) + W[t-7] + ssig0(W[t-15]) + W[t-16];
             }
-            a = hs[0]; b = hs[1]; c = hs[2]; d = hs[3];
-            e = hs[4]; f = hs[5]; g = hs[6]; h = hs[7];
-            for (t = 0; t < 64; t++) {
-                T1 = (((((((h + bsig1(e)) >>> 0) + ch(e, f, g)) >>> 0) + k[t]) >>> 0) + W[t]) >>> 0;
-                T2 = (bsig0(a) + maj(a, b, c)) >>> 0;
+            let a = hs[0], b = hs[1], c = hs[2], d = hs[3],
+                e = hs[4], f = hs[5], g = hs[6], h = hs[7];
+            for (let t = 0; t < 64; t++) {
+                const T1 = (((((((h + bsig1(e)) >>> 0) + ch(e, f, g)) >>> 0) + k[t]) >>> 0) + W[t]) >>> 0;
+                const T2 = (bsig0(a) + maj(a, b, c)) >>> 0;
                 h = g;
                 g = f;
                 f = e;
